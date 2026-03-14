@@ -175,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 20, // Balanced FPS to avoid CPU throttling
+            fps: 20, 
+            aspectRatio: 1.0, // Force 1:1 square aspect ratio
             qrbox: (viewfinderWidth, viewfinderHeight) => {
                 const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
                 return {
