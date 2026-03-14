@@ -1,0 +1,267 @@
+/* Analytics Page Specific Styles */
+/* These will layer on top of style.css */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.page-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent-dark));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(78, 84, 200, 0.4);
+}
+
+.glass-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.glass-input:focus {
+    border-color: var(--accent);
+}
+
+select.glass-input {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem top 50%;
+    background-size: 1.2rem auto;
+    cursor: pointer;
+}
+
+select.glass-input option {
+    background: var(--bg-dark);
+    color: white;
+}
+
+/* Analytics Grid Layout */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+}
+
+/* Custom Scrollbar */
+.analytics-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.analytics-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.analytics-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.chart-panel,
+.metrics-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.chart-panel.wide {
+    grid-column: span 3;
+    min-height: 350px;
+}
+
+.chart-panel.wide-half {
+    grid-column: span 2;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.panel-header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+}
+
+.btn-icon:hover {
+    color: var(--text-main);
+}
+
+.chart-container {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+}
+
+.main-chart {
+    height: 280px;
+}
+
+/* Confidence Score special formatting */
+.semi-circle {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+}
+
+.confidence-score {
+    position: absolute;
+    bottom: 20px;
+    text-align: center;
+}
+
+.confidence-score h2 {
+    font-size: 2.8rem;
+    background: linear-gradient(to right, var(--accent), var(--accent-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.2rem;
+}
+
+.confidence-score h2 span {
+    font-size: 1.2rem;
+}
+
+.confidence-score p {
+    font-size: 0.85rem;
+}
+
+/* Metrics List formatting */
+.metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.metric-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.metric-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.metric-info span {
+    color: var(--text-muted);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    border-radius: 4px;
+}
+
+.fill-success {
+    background: var(--success);
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+}
+
+.fill-primary {
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+.fill-warning {
+    background: var(--warning);
+    box-shadow: 0 0 10px rgba(255, 179, 0, 0.5);
+}
+
+.fill-danger {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1200px) {
+    .analytics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-panel.wide {
+        grid-column: span 2;
+    }
+
+    .chart-panel.wide-half {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-panel.wide,
+    .chart-panel.wide-half {
+        grid-column: span 1;
+    }
+}

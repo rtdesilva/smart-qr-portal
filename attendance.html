@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Database - SmartQR</title>
+    <!-- Core styles -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Page specific styles -->
+    <link rel="stylesheet" href="attendance.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="logo-icon"><i class="fa-solid fa-expand"></i></div>
+                    <h2>Smart<span>QR</span></h2>
+                </div>
+                <div id="sidebar-close" class="mobile-only"
+                    style="cursor: pointer; font-size: 1.2rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Students</span>
+                </a>
+                <a href="attendance.html" class="nav-item active admin-only">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+
+                <a href="analytics.html" class="nav-item admin-only">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="settings.html" class="nav-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logout-btn" style="color: var(--danger);">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div id="mobile-menu-toggle" class="mobile-only" style="font-size: 1.5rem; cursor: pointer;">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <img src="https://d1lmq142maiv1z.cloudfront.net/Untitled_1_01_682429d2a3.svg" alt="Campus Logo" style="width: auto; height: 100px; filter: drop-shadow(0 0 15px var(--accent)) drop-shadow(0 0 30px var(--accent)); transition: filter 0.3s ease;">
+                </div>
+                <div class="user-profile">
+                    <a href="settings.html" style="text-decoration: none; color: inherit;">
+                        <div class="profile-avatar glass-panel">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>Admin</span>
+                        </div>
+                    </a>
+                    <div class="notifications glass-panel">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-header">
+                <div>
+                    <h2><i class="fa-solid fa-calendar-days text-glow"></i> Attendance Database</h2>
+                    <p class="text-muted">Real-time QR attendance logs for all campus facilities.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-primary" id="export-csv-btn"><i class="fa-solid fa-download"></i> Export
+                        CSV</button>
+                </div>
+            </div>
+
+            <!-- Enhanced Data Table -->
+            <section class="data-table-container glass-panel">
+
+                <div class="table-controls">
+                    <div class="control-group">
+                        <label>Date Range:</label>
+                        <input type="date" id="start-date" class="date-picker glass-input">
+                        <span>to</span>
+                        <input type="date" id="end-date" class="date-picker glass-input">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Status:</label>
+                        <select class="glass-input" id="status-filter">
+                            <option value="all">All Status</option>
+                            <option value="present">Present</option>
+                            <option value="late">Late</option>
+                            <option value="absent">Absent</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Location:</label>
+                        <select class="glass-input" id="location-filter">
+                            <option value="all">All Locations</option>
+                            <option value="Main Entrance">Main Entrance</option>
+                            <option value="Library">Library</option>
+                            <option value="Science Lab">Science Lab</option>
+                            <option value="Gymnasium">Gymnasium</option>
+                            <option value="Cafeteria">Cafeteria</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="attendance-table" id="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Student ID</th>
+                                <th>Course</th>
+                                <th>Date & Time</th>
+                                <th>Location</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div class="showing-entries">Showing <span id="entry-count">0</span> entries</div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script src="mobile-nav.js"></script>
+    <script src="notifications.js"></script>
+    <script src="global-search.js"></script>
+    <script src="attendance.js"></script>
+</body>
+
+</html>

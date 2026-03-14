@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - SmartQR</title>
+    <!-- Core styles -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Page specific styles -->
+    <link rel="stylesheet" href="settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="logo-icon"><i class="fa-solid fa-expand"></i></div>
+                    <h2>Smart<span>QR</span></h2>
+                </div>
+                <div id="sidebar-close" class="mobile-only"
+                    style="cursor: pointer; font-size: 1.2rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="students.html" class="nav-item">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Students</span>
+                </a>
+                <a href="attendance.html" class="nav-item admin-only">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+
+                <a href="analytics.html" class="nav-item admin-only">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="settings.html" class="nav-item active">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logout-btn" style="color: var(--danger);">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div id="mobile-menu-toggle" class="mobile-only" style="font-size: 1.5rem; cursor: pointer;">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <img src="https://d1lmq142maiv1z.cloudfront.net/Untitled_1_01_682429d2a3.svg" alt="Campus Logo" style="width: auto; height: 100px; filter: drop-shadow(0 0 15px var(--accent)) drop-shadow(0 0 30px var(--accent)); transition: filter 0.3s ease;">
+                </div>
+                <div class="user-profile">
+                    <a href="settings.html" style="text-decoration: none; color: inherit;">
+                        <div class="profile-avatar glass-panel">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>Admin</span>
+                        </div>
+                    </a>
+                    <div class="notifications glass-panel">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="badge" id="notif-count">0</span>
+                        <div class="notification-dropdown glass-panel" id="notification-dropdown">
+                            <div class="dropdown-header">
+                                <h4>Notifications</h4>
+                                <button class="btn-text" id="clear-notifs">Clear All</button>
+                            </div>
+                            <div class="notif-list" id="notif-list">
+                                <!-- Notifications will be dynamic -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Settings Content -->
+            <div class="settings-container">
+                <div class="settings-tabs glass-panel">
+                    <div class="tab-item active" data-tab="profile">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Profile</span>
+                    </div>
+                    <div class="tab-item" data-tab="security">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Security</span>
+                    </div>
+                    <div class="tab-item" data-tab="appearance">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>Appearance</span>
+                    </div>
+                </div>
+
+                <div class="tab-content-area">
+                    <!-- Profile Tab -->
+                    <div class="tab-content glass-panel active" id="profile">
+                        <div class="section-title">
+                            <h3>Personal Information</h3>
+                            <p>Update your display name and view account details.</p>
+                        </div>
+                        <form id="profile-form" class="settings-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="user-fullname" class="glass-input" placeholder="Loading...">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="user-email" class="glass-input"
+                                        placeholder="user@campus.edu">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Account Role</label>
+                                    <input type="text" id="user-role" class="glass-input" readonly disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>User ID</label>
+                                    <input type="text" id="user-id" class="glass-input" readonly disabled>
+                                </div>
+                            </div>
+                            <div class="form-group" id="student-course-group" style="display: none;">
+                                <label>Course / Major</label>
+                                <input type="text" id="user-course" class="glass-input" readonly disabled>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="save-profile-btn">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div class="tab-content glass-panel" id="security">
+                        <div class="section-title">
+                            <h3>Security & Password</h3>
+                            <p>Manage your login credentials.</p>
+                        </div>
+                        <form id="security-form" class="settings-form">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="current-password" class="glass-input" placeholder="••••••••"
+                                    required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" id="new-password" class="glass-input"
+                                        placeholder="New Password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm New Password</label>
+                                    <input type="password" id="confirm-password" class="glass-input"
+                                        placeholder="Confirm Password" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="update-password-btn">Update
+                                    Password</button>
+                                <p class="text-muted" style="font-size: 0.8rem; margin-top: 10px;">Security updates are
+                                    applied directly to your Firestore account.</p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Appearance Tab -->
+                    <div class="tab-content glass-panel" id="appearance">
+                        <div class="section-title">
+                            <h3>Customize Interface</h3>
+                            <p>Tailor the portal's look and feel to your preference.</p>
+                        </div>
+                        <div class="appearance-options">
+                            <div class="option-group">
+                                <label>Theme Accent</label>
+                                <div class="color-presets">
+                                    <div class="color-swatch active" style="background: #4facfe;" data-color="#4facfe">
+                                    </div>
+                                    <div class="color-swatch" style="background: #00e676;" data-color="#00e676"></div>
+                                    <div class="color-swatch" style="background: #ff1744;" data-color="#ff1744"></div>
+                                    <div class="color-swatch" style="background: #ffb300;" data-color="#ffb300"></div>
+                                    <div class="color-swatch" style="background: #8f94fb;" data-color="#8f94fb"></div>
+                                </div>
+                            </div>
+                            <div class="option-group">
+                                <label>Glow Intensity</label>
+                                <div class="intensity-slider">
+                                    <span>Soft</span>
+                                    <input type="range" min="0" max="20" value="10" class="glass-range">
+                                    <span>Vibrant</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-primary" id="apply-appearance">Apply Theme</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script src="mobile-nav.js"></script>
+    <script src="notifications.js"></script>
+    <script src="settings.js"></script>
+</body>
+
+</html>

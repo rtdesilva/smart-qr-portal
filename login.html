@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - SmartQR</title>
+    <!-- We re-use style.css for variables and glass-panel utility -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+
+<body class="login-body">
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem; width: 100%; max-width: 1000px;">
+        <img src="https://d1lmq142maiv1z.cloudfront.net/Untitled_1_01_682429d2a3.svg" alt="Campus Logo"
+            style="width: 160px; height: auto; filter: drop-shadow(0 0 20px var(--accent)); transition: transform 0.3s;"
+            onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+
+        <div class="login-container glass-panel">
+
+            <div class="login-left">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fa-solid fa-expand"></i></div>
+                    <h2>Smart<span>QR</span></h2>
+                </div>
+
+                <div class="welcome-text">
+                    <h1>Welcome Back</h1>
+                    <p>Select your portal to login to your dashboard.</p>
+                </div>
+
+                <div class="role-toggle" style="display: flex; gap: 10px; margin-bottom: 2rem;">
+                    <button id="tab-student" class="btn-primary"
+                        style="flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer;">Student</button>
+                    <button id="tab-admin" class="btn-secondary"
+                        style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--primary); cursor: pointer; background: transparent; color: var(--text-main);">Admin</button>
+                </div>
+
+                <!-- Student Login Form -->
+                <form class="login-form active" id="student-login">
+                    <button type="button" class="btn-QR" id="btn-qr-login" style="width: 100%; margin-bottom: 20px;">
+                        <i class="fa-solid fa-qrcode pulse"></i> Scan QR Code / Upload Image
+                    </button>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="student-id">Student ID</label>
+                        <div class="input-wrapper text-glow-focus">
+                            <i class="fa-solid fa-id-card"></i>
+                            <input type="text" id="student-id" placeholder="e.g. SC-1024">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="student-password">Password / PIN</label>
+                        <div class="input-wrapper text-glow-focus">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="student-password" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Sign In as Student</button>
+                </form>
+
+                <!-- Admin Login Form -->
+                <form class="login-form" id="admin-login" style="display: none;">
+                    <div class="input-group">
+                        <label for="admin-username">Admin Username</label>
+                        <div class="input-wrapper text-glow-focus">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <input type="text" id="admin-username" placeholder="admin" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="admin-password">Password</label>
+                        <div class="input-wrapper text-glow-focus">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="admin-password" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Sign In as Admin</button>
+                </form>
+            </div>
+
+            <div class="login-right">
+                <!-- QR Scanning UI overlay -->
+                <div class="QR-login-ui" id="QR-ui">
+                    <div class="close-scan" id="close-scan"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="scan-instructions">
+                        <h3>QR Code Authentication</h3>
+                        <p>Scan your student ID QR Code</p>
+                    </div>
+
+                    <div class="scan-frame-container"
+                        style="background: transparent; border: none; align-items: flex-start;">
+                        <!-- Html5Qrcode Reader Div -->
+                        <div id="qr-reader" style="width: 100%; border-radius: 12px; overflow: hidden;"></div>
+                    </div>
+
+                    <label class="btn-secondary"
+                        style="margin-top: 15px; width: 100%; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); cursor: pointer; color: white; background: transparent; text-align: center; display: inline-block;">
+                        <i class="fa-solid fa-upload"></i> Upload Image Instead
+                        <input type="file" id="qr-upload-login" accept="image/*" style="display: none;">
+                    </label>
+
+                    <div class="scan-status" id="login-scan-status">
+                        Awaiting camera access...
+                    </div>
+                </div>
+
+                <!-- Decorative Right Side (Visible when not scanning) -->
+                <div class="login-art" id="login-art">
+                    <div class="art-content">
+                        <div style="margin-bottom: 2rem;">
+                            <img src="https://d1lmq142maiv1z.cloudfront.net/Untitled_1_01_682429d2a3.svg"
+                                alt="Campus Logo"
+                                style="width: 180px; height: auto; filter: drop-shadow(0 0 20px var(--accent));">
+                        </div>
+                        <i class="fa-solid fa-shield-halved" style="font-size: 2.5rem; opacity: 0.8;"></i>
+                        <h3>Secure & Seamless</h3>
+                        <p>Next-generation campus security powered by AI facial recognition.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script src="login.js"></script>
+</body>
+
+</html>

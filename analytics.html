@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics & Reports - SmartQR</title>
+    <!-- Core styles -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Page specific styles -->
+    <link rel="stylesheet" href="analytics.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Include Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="logo-icon"><i class="fa-solid fa-expand"></i></div>
+                    <h2>Smart<span>QR</span></h2>
+                </div>
+                <div id="sidebar-close" class="mobile-only"
+                    style="cursor: pointer; font-size: 1.2rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Students</span>
+                </a>
+                <a href="attendance.html" class="nav-item admin-only">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+
+                <a href="analytics.html" class="nav-item active admin-only">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="settings.html" class="nav-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logout-btn" style="color: var(--danger);">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div id="mobile-menu-toggle" class="mobile-only" style="font-size: 1.5rem; cursor: pointer;">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <img src="https://d1lmq142maiv1z.cloudfront.net/Untitled_1_01_682429d2a3.svg" alt="Campus Logo" style="width: auto; height: 100px; filter: drop-shadow(0 0 15px var(--accent)) drop-shadow(0 0 30px var(--accent)); transition: filter 0.3s ease;">
+                </div>
+                <div class="user-profile">
+                    <a href="settings.html" style="text-decoration: none; color: inherit;">
+                        <div class="profile-avatar glass-panel">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>Admin</span>
+                        </div>
+                    </a>
+                    <div class="notifications glass-panel">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-header">
+                <div>
+                    <h2><i class="fa-solid fa-chart-line text-glow"></i> Data Analytics</h2>
+                    <p class="text-muted">QR identification metrics and campus traffic intelligence.</p>
+                </div>
+                <div class="header-actions">
+                    <select class="glass-input date-range-select" id="dateFilter">
+                        <option value="today">Today</option>
+                        <option value="7days" selected>Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                    <button class="btn-primary" id="generateReportBtn"><i class="fa-solid fa-file-export"></i> Generate Report</button>
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard Grid -->
+            <div class="analytics-grid">
+
+                <!-- Main Traffic Chart -->
+                <section class="chart-panel wide glass-panel">
+                    <div class="panel-header">
+                        <h3>Campus Gateway Traffic & Verifications</h3>
+                        <div class="panel-actions">
+                            <button class="btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        </div>
+                    </div>
+                    <div class="chart-container main-chart">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Recognition Confidence -->
+                <section class="chart-panel glass-panel">
+                    <div class="panel-header">
+                        <h3>AI Recognition Confidence</h3>
+                    </div>
+                    <div class="chart-container semi-circle">
+                        <div class="confidence-score">
+                            <h2>98.4<span>%</span></h2>
+                            <p class="text-success"><i class="fa-solid fa-arrow-trend-up"></i> +0.6% this week</p>
+                        </div>
+                        <canvas id="confidenceChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Department Breakdown -->
+                <section class="chart-panel glass-panel">
+                    <div class="panel-header">
+                        <h3>Attendance by Department</h3>
+                    </div>
+                    <div class="chart-container doughnut-chart">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Heatmap/Processing Times -->
+                <section class="chart-panel wide-half glass-panel">
+                    <div class="panel-header">
+                        <h3>Average Processing Time (ms)</h3>
+                    </div>
+                    <div class="chart-container bar-chart">
+                        <canvas id="processingChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- System Metrics -->
+                <section class="metrics-panel glass-panel">
+                    <div class="panel-header">
+                        <h3>System Health</h3>
+                    </div>
+                    <div class="metrics-list">
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span>Database Sync</span>
+                                <strong>99.9% Uptime</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress fill-success" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span>False Acceptance Rate (FAR)</span>
+                                <strong>0.001%</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress fill-warning" style="width: 5%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span>False Rejection Rate (FRR)</span>
+                                <strong>1.2%</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress fill-danger" style="width: 12%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span>Model Storage</span>
+                                <strong id="model-storage-stat">Verifying Resources...</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress fill-primary" style="width: 42%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script src="mobile-nav.js"></script>
+    <script src="notifications.js"></script>
+    <script src="global-search.js"></script>
+    <script src="analytics.js"></script>
+</body>
+
+</html>

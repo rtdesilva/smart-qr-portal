@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus QR Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Include html5-qrcode -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="logo-icon"><i class="fa-solid fa-expand"></i></div>
+                    <h2>Smart<span>QR</span></h2>
+                </div>
+                <div id="sidebar-close" class="mobile-only"
+                    style="cursor: pointer; font-size: 1.2rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="students.html" class="nav-item">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Students</span>
+                </a>
+                <a href="attendance.html" class="nav-item admin-only">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+
+                <a href="analytics.html" class="nav-item admin-only">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="settings.html" class="nav-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" id="logout-btn" style="color: var(--danger);">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div id="mobile-menu-toggle" class="mobile-only" style="font-size: 1.5rem; cursor: pointer;">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <img src="https://d1lmq142maiv1z.cloudfront.net/Untitled_1_01_682429d2a3.svg" alt="Campus Logo"
+                        style="width: auto; height: 100px; filter: drop-shadow(0 0 15px var(--accent)) drop-shadow(0 0 30px var(--accent)); transition: filter 0.3s ease;">
+                </div>
+                <div class="user-profile">
+                    <a href="settings.html" style="text-decoration: none; color: inherit;">
+                        <div class="profile-avatar glass-panel">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>Admin</span>
+                        </div>
+                    </a>
+                    <div class="notifications glass-panel">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Welcome Banner -->
+                <section class="welcome-banner glass-panel"
+                    style="grid-column: 1 / -1; padding: 2.5rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(78, 84, 200, 0.4), var(--bg-dark)); border-radius: 16px; border: 1px solid rgba(0, 242, 254, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; position: relative;">
+                    <div style="position: relative; z-index: 2;">
+                        <div>
+                            <h2 id="admin-welcome" style="font-size: 2.2rem; margin-bottom: 0.5rem;"><span
+                                    class="text-glow">Welcome back, Admin!</span></h2>
+                            <p class="text-muted" style="font-size: 1.1rem;">Here's a quick overview of today's campus
+                                activities.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;" class="admin-only desktop-only">
+                        <a href="students.html" class="btn-primary"
+                            style="text-decoration: none; padding: 12px 24px; border-radius: 8px; color: white;"><i
+                                class="fa-solid fa-user-plus"></i> Manage Students</a>
+                        <a href="analytics.html" class="btn-secondary"
+                            style="text-decoration: none; padding: 12px 24px; border-radius: 8px; color: var(--text-main); border: 1px solid var(--primary);"><i
+                                class="fa-solid fa-chart-line"></i> View Reports</a>
+                    </div>
+                </section>
+
+                <!-- Stats Section -->
+                <section class="stats-section">
+                    <!-- Admin Stats -->
+                    <div class="stat-card glass-panel admin-only">
+                        <div class="stat-icon purple"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-content">
+                            <p>Total Present</p>
+                            <h2 id="total-present-stat">---</h2>
+                            <span class="trend up"><i class="fa-solid fa-arrow-up"></i> Live</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel admin-only">
+                        <div class="stat-icon blue"><i class="fa-solid fa-id-card-clip"></i></div>
+                        <div class="stat-content">
+                            <p>Total Students</p>
+                            <h2 id="total-students-stat">---</h2>
+                            <span class="trend up"><i class="fa-solid fa-arrow-up"></i> Active</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel admin-only">
+                        <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-content">
+                            <p>Recent Logs</p>
+                            <h2 id="recent-logs-count">---</h2>
+                            <span class="trend"><i class="fa-solid fa-clock"></i> Today</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Stats -->
+                    <div class="stat-card glass-panel student-only">
+                        <div class="stat-icon blue"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="stat-content">
+                            <p>Cumulative GPA</p>
+                            <h2 id="student-gpa">0.00</h2>
+                            <span class="trend up">Target: 4.0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel student-only">
+                        <div class="stat-icon purple"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="stat-content">
+                            <p>Attendance %</p>
+                            <h2 id="student-attendance">92%</h2>
+                            <span class="trend up">Good Standing</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel student-only">
+                        <div class="stat-icon green"
+                            style="background: rgba(46, 213, 115, 0.2); color: var(--success);"><i
+                                class="fa-solid fa-award"></i></div>
+                        <div class="stat-content">
+                            <p>Credits Earned</p>
+                            <h2 id="student-credits">0</h2>
+                            <span class="trend up">Total: 120</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Activity Log -->
+                <section class="activity-log glass-panel">
+                    <div class="section-header">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+                    </div>
+                    <div class="log-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script src="mobile-nav.js"></script>
+    <script src="notifications.js"></script>
+    <script src="global-search.js"></script>
+    <script src="database-sync.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
