@@ -174,22 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 25, 
-            qrbox: (viewfinderWidth, viewfinderHeight) => {
-                const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                return {
-                    width: Math.floor(minEdgeSize * 0.85), // Larger focus for angles
-                    height: Math.floor(minEdgeSize * 0.85)
-                };
-            },
-            aspectRatio: 1.777778, // Standard 16:9 
+            fps: 15, // Balanced FPS for high-resolution processing
+            /* Removed qrbox and aspectRatio to provide the decoder with full, raw sensor data */
             videoConstraints: {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 1280 }, // 720p: Best detail/performance ratio for angles
-                height: { ideal: 720 }
+                width: { ideal: 1920 }, // 1080p Detail: Crucial for resolving "squashed" modules at angles
+                height: { ideal: 1080 }
             },
             experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true 
+                useBarCodeDetectorIfSupported: false // Disabled to favor the more robust software engine for perspective tilts
             }
         };
 
