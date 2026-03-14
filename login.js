@@ -51,8 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- QR Scanner Logic (Student) ---
 
     // Auth Success Handler
+    // Auth Success Handler
     const handleSuccessfulAuth = (userType, metadata = {}) => {
-        scanStatus.innerHTML = '<i class="fa-solid fa-check-circle"></i> Authenticated! Redirecting...';
+        scanStatus.innerHTML = '<i class="fa-solid fa-check-circle"></i> Authorized! Entering...';
         scanStatus.style.color = "var(--success)";
 
         // Save to local storage to persist the role across pages
@@ -61,24 +62,27 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('loggedInStudent', JSON.stringify(metadata));
         } else if (userType === 'admin') {
             localStorage.setItem('adminId', metadata.username || 'admin');
-        } else {
-            localStorage.removeItem('loggedInStudent');
-            localStorage.removeItem('adminId');
         }
 
         setTimeout(() => {
             window.location.href = 'index.html'; // Redirect to dashboard
-        }, 1500);
+        }, 500); // Faster redirect
     };
 
     const handleSuccessfulScan = async (qrData) => {
         if (isScanning) {
+            isScanning = false; // Stop further hits immediately
+            console.log("QR Recognized:", qrData);
+
             // Visual success feedback
             const readerDiv = document.getElementById('qr-reader');
             const flash = document.createElement('div');
             flash.className = 'scan-flash';
             readerDiv.appendChild(flash);
-            setTimeout(() => flash.remove(), 600);
+            setTimeout(() => flash.remove(), 400);
+
+            scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Student ID...';
+            scanStatus.style.color = "var(--accent)";
 
             await stopScan();
             
@@ -86,27 +90,24 @@ document.addEventListener('DOMContentLoaded', () => {
             let decodedData = qrData;
             try {
                 decodedData = decodeURIComponent(qrData);
-            } catch (e) {
-                console.warn("Decoding failed, using raw data");
-            }
+            } catch (e) { }
 
             let studentId = decodedData.trim();
-
-            // 2. Handle "Student:ID" prefix (case-insensitive)
             if (studentId.toLowerCase().startsWith('student:')) {
                 studentId = studentId.substring(8).trim();
             }
-
-            // 3. Remove leading '#' if present (common in manually typed IDs)
             if (studentId.startsWith('#')) {
                 studentId = studentId.substring(1).trim();
             }
+
+            console.log("Parsed ID:", studentId);
 
             try {
                 // Fetch student from Firestore
                 const doc = await db.collection('students').doc(studentId).get();
                 if (doc.exists) {
                     const student = doc.data();
+                    console.log("Student found:", student.name);
 
                     // Add a log entry for the login
                     await db.collection('activityLogs').add({
@@ -131,25 +132,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         course: student.course,
                         date: now.toISOString().split('T')[0],
                         time: `${displayHour}:${minutes} ${ampm}`,
-                        location: "Main Entrance", // Default
-                        status: hours > 9 ? "late" : "present", // Logic: Late after 9 AM
+                        location: "Main Entrance",
+                        status: hours > 9 ? "late" : "present",
                         method: "QR Code",
                         timestamp: firebase.firestore.Timestamp.now()
                     });
 
                     handleSuccessfulAuth('student', student);
                 } else {
-                    scanStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Student ID not found.';
+                    console.warn("Student ID not found in database:", studentId);
+                    scanStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ID Not Found: ${studentId}`;
                     scanStatus.style.color = "var(--danger)";
                     setTimeout(() => {
                         scanStatus.innerHTML = '<i class="fa-solid fa-qrcode"></i> Scanning...';
                         scanStatus.style.color = "var(--accent)";
                         startScan(); // Resume scanning
-                    }, 3000);
+                    }, 4000);
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                scanStatus.innerHTML = 'Authentication failed. Check connection.';
+                console.error('Database/Login error:', error);
+                scanStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Connection Error. Retrying...';
+                setTimeout(() => startScan(), 3000);
             }
         }
     };
@@ -166,25 +169,16 @@ document.addEventListener('DOMContentLoaded', () => {
             fps: 20,
             qrbox: (viewfinderWidth, viewfinderHeight) => {
                 const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                const qrboxSize = Math.floor(minEdgeSize * 0.75); // Use 75% of view for scanning
                 return {
-                    width: qrboxSize,
-                    height: qrboxSize
+                    width: Math.floor(minEdgeSize * 0.75),
+                    height: Math.floor(minEdgeSize * 0.75)
                 };
             },
-            qrbox: (viewfinderWidth, viewfinderHeight) => {
-                const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                const qrboxSize = Math.floor(minEdgeSize * 0.8); // Larger box for easier alignment
-                return {
-                    width: qrboxSize,
-                    height: qrboxSize
-                };
-            },
-            // aspectRatio: 1.0, // REMOVED: Allowing native sensor resolution for better detail
+            aspectRatio: 1.0, // Re-enabled for better library stability
             videoConstraints: {
-                width: { ideal: 1920 }, // Requesting Full HD
-                height: { ideal: 1080 },
-                facingMode: { ideal: "environment" }
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             },
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true 
