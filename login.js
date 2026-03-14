@@ -169,22 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 20,
+            fps: 10, // Lower FPS for more reliable decoding on mobile
             qrbox: (viewfinderWidth, viewfinderHeight) => {
                 const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
                 return {
-                    width: Math.floor(minEdgeSize * 0.75),
-                    height: Math.floor(minEdgeSize * 0.75)
+                    width: Math.floor(minEdgeSize * 0.8), // Slightly larger area
+                    height: Math.floor(minEdgeSize * 0.8)
                 };
             },
-            aspectRatio: 1.0, // Re-enabled for better library stability
+            // aspectRatio: 1.0, // Removed to allow natural video aspect ratio
             videoConstraints: {
                 facingMode: { ideal: "environment" },
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
-            },
-            experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true 
             }
         };
 
