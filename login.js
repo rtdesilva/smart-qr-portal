@@ -179,10 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
             aspectRatio: 1.0, 
             qrbox: (viewfinderWidth, viewfinderHeight) => {
                 const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                // Smaller box = faster processing. 60% is plenty for a QR code.
+                // Expanded box (80%) for easier aiming while maintaining performance
                 return {
-                    width: Math.floor(minEdgeSize * 0.60),
-                    height: Math.floor(minEdgeSize * 0.60)
+                    width: Math.floor(minEdgeSize * 0.80),
+                    height: Math.floor(minEdgeSize * 0.80)
                 };
             },
             videoConstraints: {
