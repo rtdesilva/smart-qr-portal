@@ -131,118 +131,136 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- 4. Initialize Charts with Live Data ---
-    try {
-        const [deptData, trafficData] = await Promise.all([
-            fetchDepartmentData(),
-            fetchTrafficData(),
-            updateQuickStats()
-        ]);
+    const initializeAnalytics = async () => {
+        try {
+            // Fetch dynamic data in parallel with fallback handling
+            const [deptData, trafficData] = await Promise.all([
+                fetchDepartmentData().catch(err => {
+                    console.warn('Student data fetch failed:', err);
+                    return { labels: ['No Data'], data: [1] };
+                }),
+                fetchTrafficData().catch(err => {
+                    console.warn('Traffic data fetch failed:', err);
+                    return { labels: [], data: [] };
+                }),
+                updateQuickStats().catch(err => console.warn('Stats update failed:', err))
+            ]);
 
-        // Traffic Line Chart
-        const ctxTraffic = document.getElementById('trafficChart').getContext('2d');
-        const gradientTraffic = ctxTraffic.createLinearGradient(0, 0, 0, 400);
-        gradientTraffic.addColorStop(0, 'rgba(0, 242, 254, 0.5)');
-        gradientTraffic.addColorStop(1, 'rgba(0, 242, 254, 0.05)');
+            // Traffic Line Chart
+            const trafficCanvas = document.getElementById('trafficChart');
+            if (trafficCanvas) {
+                const ctxTraffic = trafficCanvas.getContext('2d');
+                const gradientTraffic = ctxTraffic.createLinearGradient(0, 0, 0, 400);
+                gradientTraffic.addColorStop(0, 'rgba(0, 242, 254, 0.5)');
+                gradientTraffic.addColorStop(1, 'rgba(0, 242, 254, 0.05)');
 
-        const trafficChart = new Chart(ctxTraffic, {
-            type: 'line',
-            data: {
-                labels: trafficData.labels,
-                datasets: [{
-                    label: 'Successful Verifications',
-                    data: trafficData.data,
-                    borderColor: '#00f2fe',
-                    backgroundColor: gradientTraffic,
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#00f2fe',
-                    pointBorderColor: 'rgba(255, 255, 255, 0.8)',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { intersect: false, mode: 'index' },
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: { enabled: true }
-                },
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.03)' }
-                    }, 
-                    x: { 
-                        grid: { display: false }
-                    } 
+                const trafficChart = new Chart(ctxTraffic, {
+                    type: 'line',
+                    data: {
+                        labels: trafficData.labels,
+                        datasets: [{
+                            label: 'Successful Verifications',
+                            data: trafficData.data,
+                            borderColor: '#00f2fe',
+                            backgroundColor: gradientTraffic,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#00f2fe',
+                            pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: { enabled: true }
+                        },
+                        scales: { 
+                            y: { 
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                            }, 
+                            x: { 
+                                grid: { display: false }
+                            } 
+                        }
+                    }
+                });
+
+                const dateFilter = document.getElementById('dateFilter');
+                if (dateFilter) {
+                    dateFilter.addEventListener('change', async (e) => {
+                        const newData = await fetchTrafficData(e.target.value);
+                        trafficChart.data.labels = newData.labels;
+                        trafficChart.data.datasets[0].data = newData.data;
+                        trafficChart.update();
+                    });
+                }
+
+                const generateReportBtn = document.getElementById('generateReportBtn');
+                if (generateReportBtn) {
+                    generateReportBtn.addEventListener('click', () => {
+                        let csvContent = "data:text/csv;charset=utf-8,Time/Date,Successful Verifications\n";
+                        const labels = trafficChart.data.labels;
+                        const data = trafficChart.data.datasets[0].data;
+                        
+                        for (let i = 0; i < labels.length; i++) {
+                            csvContent += `${labels[i]},${data[i]}\n`;
+                        }
+                        
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `campus_traffic_report_${new Date().toISOString().split('T')[0]}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
                 }
             }
-        });
 
-        const dateFilter = document.getElementById('dateFilter');
-        if (dateFilter) {
-            dateFilter.addEventListener('change', async (e) => {
-                const newData = await fetchTrafficData(e.target.value);
-                trafficChart.data.labels = newData.labels;
-                trafficChart.data.datasets[0].data = newData.data;
-                trafficChart.update();
-            });
-        }
-
-        const generateReportBtn = document.getElementById('generateReportBtn');
-        if (generateReportBtn) {
-            generateReportBtn.addEventListener('click', () => {
-                let csvContent = "data:text/csv;charset=utf-8,Time/Date,Successful Verifications\n";
-                const labels = trafficChart.data.labels;
-                const data = trafficChart.data.datasets[0].data;
-                
-                for (let i = 0; i < labels.length; i++) {
-                    csvContent += `${labels[i]},${data[i]}\n`;
-                }
-                
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `campus_traffic_report_${new Date().toISOString().split('T')[0]}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-        }
-
-        // Department Breakdown Doughnut
-        const ctxDept = document.getElementById('departmentChart').getContext('2d');
-        new Chart(ctxDept, {
-            type: 'doughnut',
-            data: {
-                labels: deptData.labels,
-                datasets: [{
-                    data: deptData.data,
-                    backgroundColor: ['#4e54c8', '#8f94fb', '#00f2fe', '#4facfe', '#2ed573', '#ff4757'],
-                    borderWidth: 2,
-                    borderColor: '#0a0a0f',
-                    cutout: '65%'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
-                }
+            // Department Breakdown Doughnut
+            const deptCanvas = document.getElementById('departmentChart');
+            if (deptCanvas && deptData.labels.length > 0) {
+                const ctxDept = deptCanvas.getContext('2d');
+                new Chart(ctxDept, {
+                    type: 'doughnut',
+                    data: {
+                        labels: deptData.labels,
+                        datasets: [{
+                            data: deptData.data,
+                            backgroundColor: ['#4e54c8', '#8f94fb', '#00f2fe', '#4facfe', '#2ed573', '#ff4757'],
+                            borderWidth: 2,
+                            borderColor: '#0a0a0f',
+                            cutout: '65%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                        }
+                    }
+                });
             }
-        });
 
-        // Initializing remaining static charts (Confidence & Processing)
-        initStaticCharts();
+        } catch (error) {
+            console.error('Core analytics initialization failed:', error);
+        } finally {
+            // Always initialize static charts regardless of dynamic data success
+            initStaticCharts();
+        }
+    };
 
-    } catch (error) {
-        console.error('Error initializing analytics charts:', error);
-    }
+    // Execute initialization
+    initializeAnalytics();
 
     function initStaticCharts() {
         // Confidence Semi-Circle
