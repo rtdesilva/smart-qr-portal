@@ -3,14 +3,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!db) return;
 
     // Chart Global Defaults
-    Chart.defaults.color = '#9aa0a6';
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
     Chart.defaults.font.family = "'Outfit', sans-serif";
-    Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22, 22, 35, 0.9)';
+    Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.03)';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10, 10, 18, 0.95)';
     Chart.defaults.plugins.tooltip.titleColor = '#00f2fe';
-    Chart.defaults.plugins.tooltip.padding = 10;
-    Chart.defaults.plugins.tooltip.borderColor = 'rgba(0, 242, 254, 0.2)';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.borderColor = 'rgba(0, 242, 254, 0.3)';
     Chart.defaults.plugins.tooltip.borderWidth = 1;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.usePointStyle = true;
 
 
     // Helper: Date Logic
@@ -103,11 +105,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- 3. Initialize Charts with Live Data ---
+    // --- 3. Fetch Quick Stats ---
+    const updateQuickStats = async () => {
+        const attendanceSnapshot = await db.collection('attendance').get();
+        const totalScans = attendanceSnapshot.size;
+        
+        // Find Peak Hour
+        const hourCounts = {};
+        attendanceSnapshot.forEach(doc => {
+            const timeStr = doc.data().time;
+            if (timeStr) {
+                const hour = timeStr.split(':')[0] + (timeStr.toLowerCase().includes('pm') ? ' PM' : ' AM');
+                hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+            }
+        });
+        
+        const peakHour = Object.entries(hourCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || '---';
+
+        // Update DOM
+        const scansEl = document.getElementById('total-scans-val');
+        const peakEl = document.getElementById('peak-traffic-val');
+        
+        if (scansEl) scansEl.innerText = totalScans.toLocaleString();
+        if (peakEl) peakEl.innerText = peakHour;
+    };
+
+    // --- 4. Initialize Charts with Live Data ---
     try {
         const [deptData, trafficData] = await Promise.all([
             fetchDepartmentData(),
-            fetchTrafficData()
+            fetchTrafficData(),
+            updateQuickStats()
         ]);
 
         // Traffic Line Chart
@@ -125,16 +153,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     data: trafficData.data,
                     borderColor: '#00f2fe',
                     backgroundColor: gradientTraffic,
-                    borderWidth: 2,
+                    borderWidth: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointBackgroundColor: '#00f2fe',
+                    pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
+                interaction: { intersect: false, mode: 'index' },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                    }, 
+                    x: { 
+                        grid: { display: false }
+                    } 
+                }
             }
         });
 
