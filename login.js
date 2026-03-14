@@ -174,19 +174,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 10, // Lower FPS for more reliable decoding on mobile
-            qrbox: (viewfinderWidth, viewfinderHeight) => {
-                const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                return {
-                    width: Math.floor(minEdgeSize * 0.8), // Slightly larger area
-                    height: Math.floor(minEdgeSize * 0.8)
-                };
-            },
-            // aspectRatio: 1.0, // Removed to allow natural video aspect ratio
+            fps: 25, // Higher FPS for near-instant detection
+            /* Removed qrbox to allow full-frame sampling, which is faster on modern devices */
+            // aspectRatio: 1.0, 
             videoConstraints: {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                width: { ideal: 640 }, // Lowering resolution for faster frame analysis
+                height: { ideal: 480 }
+            },
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true // Re-enabled native hardware acceleration
             }
         };
 
