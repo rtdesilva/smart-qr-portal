@@ -175,22 +175,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 20, 
-            aspectRatio: 1.0, // Force 1:1 square aspect ratio
+            fps: 25, // Higher FPS for more "chances" to catch the code per second
+            aspectRatio: 1.0, 
             qrbox: (viewfinderWidth, viewfinderHeight) => {
                 const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                // Smaller box = faster processing. 60% is plenty for a QR code.
                 return {
-                    width: Math.floor(minEdgeSize * 0.75), // Focused region for faster analysis
-                    height: Math.floor(minEdgeSize * 0.75)
+                    width: Math.floor(minEdgeSize * 0.60),
+                    height: Math.floor(minEdgeSize * 0.60)
                 };
             },
             videoConstraints: {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 1280 }, // 720p is the sweet spot for detail vs performance
-                height: { ideal: 720 }
+                // Matching the 1:1 aspectRatio precisely to avoid browser-side scaling lag
+                width: { ideal: 800 }, 
+                height: { ideal: 800 },
+                // Request advanced focus mode if the browser/device supports it
+                focusMode: "continuous"
             },
+            formatsToSupport: [ 0 ], // 0 = QR_CODE. Ignores all other barcodes to save CPU.
             experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true // Re-enable high-performance native scanning
+                useBarCodeDetectorIfSupported: true
             }
         };
 
