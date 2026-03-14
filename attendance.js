@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilter = document.getElementById('status-filter');
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
-    const endDateInput = document.getElementById('end-date');
 
     // --- Cloud Database Logic ---
     const seedAttendanceData = async () => {
@@ -144,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusTerm = statusFilter ? statusFilter.value : 'all';
         const startD = startDateInput ? startDateInput.value : '';
         const endD = endDateInput ? endDateInput.value : '';
-        const endD = endDateInput ? endDateInput.value : '';
 
         const filtered = allAttendanceLogs.filter(record => {
             const matchesSearch =
@@ -171,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (statusFilter) statusFilter.addEventListener('change', filterData);
     if (startDateInput) startDateInput.addEventListener('change', filterData);
     if (endDateInput) endDateInput.addEventListener('change', filterData);
-    if (endDateInput) endDateInput.addEventListener('change', filterData);
 
     const exportBtn = document.getElementById('export-csv-btn');
     if (exportBtn) {
@@ -182,6 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Define CSV headers
+            const headers = ['Student Name', 'Student ID', 'Course', 'Date', 'Time', 'Status'];
+
+            // Map logs to CSV rows
+            const rows = allAttendanceLogs.map(log => [
                 `"${log.name}"`,
                 `"${log.id}"`,
                 `"${log.course}"`,
