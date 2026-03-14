@@ -194,4 +194,15 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerHTML = originalText;
         }
     });
+    // Expose QR viewing for student-views.js
+    window.showStudentQR = (studentId) => {
+        const qrData = encodeURIComponent(`Student:${studentId}`);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${qrData}`;
+        qrImage.src = qrUrl;
+        
+        modal.style.display = 'flex';
+        form.style.display = 'none';
+        qrDisplay.style.display = 'flex';
+    };
+
 });

@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scanStatus.style.color = "var(--text-main)";
 
             await html5QrCode.start(
-                { facingMode: "environment" },
+                { facingMode: { ideal: "environment" } },
                 {
                     fps: 10,
                     qrbox: { width: 250, height: 250 },
@@ -164,7 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error("Error starting camera", err);
-            scanStatus.innerHTML = 'Camera Error. Permission denied?';
+            let errorMsg = 'Camera Error.';
+            if (err.name === 'NotReadableError') {
+                errorMsg = 'Camera in use or not found.';
+            } else if (err.name === 'NotAllowedError') {
+                errorMsg = 'Permission denied.';
+            }
+            scanStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${errorMsg}`;
             scanStatus.style.color = "var(--danger)";
         }
     };

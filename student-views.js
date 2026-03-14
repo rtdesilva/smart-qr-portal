@@ -95,6 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="text-muted">Academic Standing:</span>
                         <span class="${student.standing === 'Excellent' ? 'text-success' : 'text-glow'}">${student.standing || 'Good'}</span>
                     </div>
+                    <button class="btn-secondary admin-only" onclick="window.showStudentQR('${student.id}')" 
+                        style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--accent);">
+                        <i class="fa-solid fa-qrcode"></i> View & Download QR
+                    </button>
                 </div>
             `;
 
