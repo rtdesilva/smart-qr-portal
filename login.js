@@ -169,13 +169,21 @@ document.addEventListener('DOMContentLoaded', () => {
             scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting camera...';
             scanStatus.style.color = "var(--text-main)";
 
+            isScanning = true; // Set before start so immediate hits are caught
+
             // Attempt 1: Try environment-facing camera
             try {
                 await html5QrCode.start(
                     { facingMode: "environment" },
                     config,
-                    (decodedText) => handleSuccessfulScan(decodedText),
-                    () => { } // Error ignored
+                    (decodedText) => {
+                        console.log("QR Recognized (Live):", decodedText);
+                        handleSuccessfulScan(decodedText);
+                    },
+                    (errorMessage) => {
+                        // Very verbose, only enable for deep debugging
+                        // console.log("Scan error:", errorMessage);
+                    }
                 );
             } catch (firstErr) {
                 console.warn("Environment camera failed, trying fallback...", firstErr);
@@ -183,16 +191,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 await html5QrCode.start(
                     {}, 
                     config,
-                    (decodedText) => handleSuccessfulScan(decodedText),
+                    (decodedText) => {
+                        console.log("QR Recognized (Fallback):", decodedText);
+                        handleSuccessfulScan(decodedText);
+                    },
                     () => { }
                 );
             }
             
-            isScanning = true;
             scanStatus.innerHTML = '<i class="fa-solid fa-qrcode"></i> Scanning...';
             scanStatus.style.color = "var(--accent)";
 
         } catch (err) {
+            isScanning = false;
             console.error("Critical camera error", err);
             let errorMsg = 'Camera Error.';
             if (err.name === 'NotReadableError') {
