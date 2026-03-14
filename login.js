@@ -156,35 +156,48 @@ document.addEventListener('DOMContentLoaded', () => {
             html5QrCode = new Html5Qrcode("qr-reader");
         }
 
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        };
+
         try {
             scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting camera...';
             scanStatus.style.color = "var(--text-main)";
 
-            await html5QrCode.start(
-                { facingMode: { ideal: "environment" } },
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0
-                },
-                (decodedText) => {
-                    handleSuccessfulScan(decodedText);
-                },
-                (errorMessage) => {
-                    // Ignore background errors
-                }
-            );
+            // Attempt 1: Try environment-facing camera
+            try {
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    (decodedText) => handleSuccessfulScan(decodedText),
+                    () => { } // Error ignored
+                );
+            } catch (firstErr) {
+                console.warn("Environment camera failed, trying fallback...", firstErr);
+                // Attempt 2: Try any available camera (null constraint)
+                await html5QrCode.start(
+                    {}, 
+                    config,
+                    (decodedText) => handleSuccessfulScan(decodedText),
+                    () => { }
+                );
+            }
+            
             isScanning = true;
             scanStatus.innerHTML = '<i class="fa-solid fa-qrcode"></i> Scanning...';
             scanStatus.style.color = "var(--accent)";
 
         } catch (err) {
-            console.error("Error starting camera", err);
+            console.error("Critical camera error", err);
             let errorMsg = 'Camera Error.';
             if (err.name === 'NotReadableError') {
                 errorMsg = 'Camera in use or not found.';
             } else if (err.name === 'NotAllowedError') {
                 errorMsg = 'Permission denied.';
+            } else if (err.name === 'NotFoundError') {
+                errorMsg = 'No camera detected.';
             }
             scanStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${errorMsg}`;
             scanStatus.style.color = "var(--danger)";
