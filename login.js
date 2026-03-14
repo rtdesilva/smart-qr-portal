@@ -70,90 +70,93 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleSuccessfulScan = async (qrData) => {
-        if (isScanning) {
-            isScanning = false; // Stop further hits immediately
-            console.log("QR Recognized:", qrData);
+        if (!isScanning) return; // Guard against multiple triggers
+        
+        isScanning = false; 
+        console.log("QR Recognized. Attempting to stop camera and verify...");
 
-            // Visual success feedback
-            const readerDiv = document.getElementById('qr-reader');
+        // Visual success feedback
+        const readerDiv = document.getElementById('qr-reader');
+        if (readerDiv) {
             const flash = document.createElement('div');
             flash.className = 'scan-flash';
             readerDiv.appendChild(flash);
             setTimeout(() => flash.remove(), 400);
+        }
 
-            scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Student ID...';
-            scanStatus.style.color = "var(--accent)";
+        scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Student ID...';
+        scanStatus.style.color = "var(--accent)";
 
-            await stopScan();
-            
-            // --- ROBUST PARSING ---
-            let decodedData = qrData;
-            try {
-                decodedData = decodeURIComponent(qrData);
-            } catch (e) { }
+        // Important: Stop the camera BEFORE doing long async DB work
+        await stopScan();
+        
+        // --- ROBUST PARSING ---
+        let decodedData = qrData;
+        try {
+            decodedData = decodeURIComponent(qrData);
+        } catch (e) { }
 
-            let studentId = decodedData.trim();
-            if (studentId.toLowerCase().startsWith('student:')) {
-                studentId = studentId.substring(8).trim();
+        let studentId = decodedData.trim();
+        if (studentId.toLowerCase().startsWith('student:')) {
+            studentId = studentId.substring(8).trim();
+        }
+        if (studentId.startsWith('#')) {
+            studentId = studentId.substring(1).trim();
+        }
+
+        console.log("Final Parsed Student ID:", studentId);
+
+        try {
+            // Fetch student from Firestore
+            const doc = await db.collection('students').doc(studentId).get();
+            if (doc.exists) {
+                const student = doc.data();
+                console.log("Student Authenticated:", student.name);
+
+                // Add a log entry for the login
+                await db.collection('activityLogs').add({
+                    studentName: student.name,
+                    action: "Authorized - QR Login",
+                    timestamp: firebase.firestore.Timestamp.now(),
+                    role: "student"
+                });
+
+                // --- RECORD ATTENDANCE ---
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const displayHour = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+
+                await db.collection('attendance').add({
+                    id: student.id,
+                    name: student.name,
+                    initials: student.name.split(' ').map(n => n[0]).join(''),
+                    email: `${student.name.toLowerCase().replace(' ', '.')}@campus.edu`,
+                    course: student.course,
+                    date: now.toISOString().split('T')[0],
+                    time: `${displayHour}:${minutes} ${ampm}`,
+                    location: "Main Entrance",
+                    status: hours > 9 ? "late" : "present",
+                    method: "QR Code",
+                    timestamp: firebase.firestore.Timestamp.now()
+                });
+
+                handleSuccessfulAuth('student', student);
+            } else {
+                console.warn("Student ID not found in database:", studentId);
+                scanStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ID Not Found: ${studentId}`;
+                scanStatus.style.color = "var(--danger)";
+                setTimeout(() => {
+                    scanStatus.innerHTML = '<i class="fa-solid fa-qrcode"></i> Scanning...';
+                    scanStatus.style.color = "var(--accent)";
+                    startScan(); // Resume scanning
+                }, 4000);
             }
-            if (studentId.startsWith('#')) {
-                studentId = studentId.substring(1).trim();
-            }
-
-            console.log("Parsed ID:", studentId);
-
-            try {
-                // Fetch student from Firestore
-                const doc = await db.collection('students').doc(studentId).get();
-                if (doc.exists) {
-                    const student = doc.data();
-                    console.log("Student found:", student.name);
-
-                    // Add a log entry for the login
-                    await db.collection('activityLogs').add({
-                        studentName: student.name,
-                        action: "Authorized - QR Login",
-                        timestamp: firebase.firestore.Timestamp.now(),
-                        role: "student"
-                    });
-
-                    // --- RECORD ATTENDANCE ---
-                    const now = new Date();
-                    const hours = now.getHours();
-                    const minutes = now.getMinutes().toString().padStart(2, '0');
-                    const ampm = hours >= 12 ? 'PM' : 'AM';
-                    const displayHour = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-
-                    await db.collection('attendance').add({
-                        id: student.id,
-                        name: student.name,
-                        initials: student.name.split(' ').map(n => n[0]).join(''),
-                        email: `${student.name.toLowerCase().replace(' ', '.')}@campus.edu`,
-                        course: student.course,
-                        date: now.toISOString().split('T')[0],
-                        time: `${displayHour}:${minutes} ${ampm}`,
-                        location: "Main Entrance",
-                        status: hours > 9 ? "late" : "present",
-                        method: "QR Code",
-                        timestamp: firebase.firestore.Timestamp.now()
-                    });
-
-                    handleSuccessfulAuth('student', student);
-                } else {
-                    console.warn("Student ID not found in database:", studentId);
-                    scanStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ID Not Found: ${studentId}`;
-                    scanStatus.style.color = "var(--danger)";
-                    setTimeout(() => {
-                        scanStatus.innerHTML = '<i class="fa-solid fa-qrcode"></i> Scanning...';
-                        scanStatus.style.color = "var(--accent)";
-                        startScan(); // Resume scanning
-                    }, 4000);
-                }
-            } catch (error) {
-                console.error('Database/Login error:', error);
-                scanStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Connection Error. Retrying...';
-                setTimeout(() => startScan(), 3000);
-            }
+        } catch (error) {
+            console.error('Database/Login error:', error);
+            scanStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Connection Error. Restarting Scanner...';
+            setTimeout(() => startScan(), 3000);
         }
     };
 
@@ -239,14 +242,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const stopScan = async () => {
-        if (html5QrCode && isScanning) {
+        if (html5QrCode) {
+            console.log("Requesting camera stop...");
             try {
                 await html5QrCode.stop();
-                isScanning = false;
+                console.log("Camera stopped successfully.");
             } catch (err) {
-                console.error("Failed to stop scanning.", err);
+                console.warn("Camera stop issue (may already be stopped):", err);
             }
         }
+        isScanning = false;
     };
 
     QRBtn.addEventListener('click', (e) => {
@@ -262,8 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // File upload handle
-    qrUploadInput.addEventListener('change', (e) => {
+    qrUploadInput.addEventListener('change', async (e) => {
         if (e.target.files.length == 0) return;
+
+        // Ensure camera is stopped first
+        await stopScan();
 
         if (!html5QrCode) {
             html5QrCode = new Html5Qrcode("qr-reader");
@@ -273,15 +281,15 @@ document.addEventListener('DOMContentLoaded', () => {
         scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Image...';
         scanStatus.style.color = "var(--text-main)";
 
-        html5QrCode.scanFile(imageFile, true)
-            .then(decodedText => {
-                isScanning = true; // Pretend we are scanning so stopScan runs properly
-                handleSuccessfulScan(decodedText);
-            })
-            .catch(err => {
-                scanStatus.innerHTML = 'No QR Code detected in image.';
-                scanStatus.style.color = "var(--danger)";
-            });
+        try {
+            const decodedText = await html5QrCode.scanFile(imageFile, true);
+            isScanning = true; // Set to true so handleSuccessfulScan doesn't guard it
+            await handleSuccessfulScan(decodedText);
+        } catch (err) {
+            console.error("QR Scan File Error:", err);
+            scanStatus.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> No QR detected in image.';
+            scanStatus.style.color = "var(--danger)";
+        }
 
         e.target.value = '';
     });
