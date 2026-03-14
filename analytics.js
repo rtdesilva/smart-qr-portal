@@ -238,10 +238,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         new Chart(ctxProcessing, {
             type: 'bar',
             data: {
-                labels: ['Main Gate', 'Library', 'Lab 1', 'Lab 2'],
+                labels: ['Main Gate', 'Library', 'Lab 1', 'Lab 2', 'Lab 3'],
                 datasets: [{
                     label: 'Avg Response Time (ms)',
-                    data: [105, 78, 130, 145],
+                    data: [105, 78, 130, 145, 112],
                     backgroundColor: '#8f94fb',
                     borderRadius: 4,
                 }]
