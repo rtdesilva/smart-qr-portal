@@ -117,21 +117,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const snapshot = await db.collection('students').get();
-            const courses = new Set();
+            const courseMap = new Map(); // Store display name keyed by lowercase version for deduplication
+
+            // Base options
+            const baseCourses = [
+                "Business Admin",
+                "Computer Science",
+                "Engineering",
+                "Information Technology",
+                "Multimedia",
+                "System Engineering"
+            ];
+
+            baseCourses.forEach(c => courseMap.set(c.toLowerCase(), c));
+
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.course) courses.add(data.course);
+                if (data.course) {
+                    const courseTrimmed = data.course.trim();
+                    if (courseTrimmed) {
+                        // If it's a new variation of an existing course (e.g. "multimedia"), 
+                        // we keep the first one we find or stick to the base list version.
+                        if (!courseMap.has(courseTrimmed.toLowerCase())) {
+                            courseMap.set(courseTrimmed.toLowerCase(), courseTrimmed);
+                        }
+                    }
+                }
             });
 
-            // Keep "Computer Science", "Business Admin", "Engineering" as fallback/base options if not in DB
-            courses.add("Computer Science");
-            courses.add("Business Admin");
-            courses.add("Engineering");
-            courses.add("System Engineering");
-            courses.add("Information Technology");
-
             courseSelect.innerHTML = '<option value="" disabled selected>Select Course / Major</option>';
-            Array.from(courses).sort().forEach(course => {
+            
+            // Get values from map, sort them, and render
+            Array.from(courseMap.values()).sort().forEach(course => {
                 const option = document.createElement('option');
                 option.value = course;
                 option.textContent = course;
