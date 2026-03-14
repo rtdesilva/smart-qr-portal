@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // aspectRatio: 1.0, 
             videoConstraints: {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 640 }, // Lowering resolution for faster frame analysis
-                height: { ideal: 480 }
+                width: { ideal: 1920 }, // High-resolution processing
+                height: { ideal: 1080 }
             },
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true // Re-enabled native hardware acceleration
