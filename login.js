@@ -157,9 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0
+            fps: 20, // Increased for faster capture
+            qrbox: { width: 300, height: 300 }, // Slightly larger box
+            aspectRatio: 1.0,
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true // Hardware acceleration
+            }
         };
 
         try {
