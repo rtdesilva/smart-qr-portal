@@ -172,10 +172,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     height: qrboxSize
                 };
             },
-            aspectRatio: 1.0,
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                const qrboxSize = Math.floor(minEdgeSize * 0.8); // Larger box for easier alignment
+                return {
+                    width: qrboxSize,
+                    height: qrboxSize
+                };
+            },
+            // aspectRatio: 1.0, // REMOVED: Allowing native sensor resolution for better detail
             videoConstraints: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
+                width: { ideal: 1920 }, // Requesting Full HD
+                height: { ideal: 1080 },
                 facingMode: { ideal: "environment" }
             },
             experimentalFeatures: {
