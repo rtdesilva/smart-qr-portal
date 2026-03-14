@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const db = window.db;
 
-    const QRBtn = document.getElementById('btn-qr-login');
     const QRUI = document.getElementById('QR-ui');
     const loginArt = document.getElementById('login-art');
     const closeScan = document.getElementById('close-scan');
@@ -30,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formStudent.style.display = 'flex';
         formAdmin.style.display = 'none';
+
+        // Auto-start scanner when switching back to Student
+        startScan();
     });
 
     tabAdmin.addEventListener('click', () => {
@@ -45,6 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formAdmin.style.display = 'flex';
         formStudent.style.display = 'none';
+
+        // Auto-stop scanner when switching to Admin
+        stopScan();
     });
 
 
@@ -251,10 +256,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isScanning = false;
     };
 
-    QRBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        startScan();
-    });
+    // Auto-start on load if student tab is active
+    setTimeout(() => {
+        if (formStudent.style.display !== 'none') {
+            startScan();
+        }
+    }, 100);
 
     closeScan.addEventListener('click', () => {
         stopScan().then(() => {
