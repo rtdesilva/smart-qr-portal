@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scanStatus.innerHTML = '<i class="fa-solid fa-check-circle"></i> Authorized! Entering...';
         scanStatus.style.color = "var(--success)";
 
-        // Save to local storage to persist the role across pages
+        // Save to local storage
         localStorage.setItem('role', userType);
         if (userType === 'student' && metadata.id) {
             localStorage.setItem('loggedInStudent', JSON.stringify(metadata));
@@ -69,9 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('adminId', metadata.username || 'admin');
         }
 
-        setTimeout(() => {
-            window.location.href = 'index.html'; // Redirect to dashboard
-        }, 500); // Faster redirect
+        // --- INSTANT REDIRECT ---
+        window.location.href = 'index.html';
     };
 
     const handleSuccessfulScan = async (qrData) => {
@@ -92,8 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
         scanStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Student ID...';
         scanStatus.style.color = "var(--accent)";
 
-        // Important: Stop the camera BEFORE doing long async DB work
-        await stopScan();
+        // --- PARALLEL PROCESSING ---
+        // Stop camera and query DB at the SAME time to save multiple seconds
+        const stopCamPromise = stopScan();
         
         // --- ROBUST PARSING ---
         let decodedData = qrData;
@@ -109,31 +109,31 @@ document.addEventListener('DOMContentLoaded', () => {
             studentId = studentId.substring(1).trim();
         }
 
-        console.log("Final Parsed Student ID:", studentId);
-
         try {
-            // Fetch student from Firestore
-            const doc = await db.collection('students').doc(studentId).get();
+            // Start DB lookup immediately
+            const docPromise = db.collection('students').doc(studentId).get();
+            
+            // Wait for BOTH (though DB usually takes longer, we don't block one for the other)
+            const [doc] = await Promise.all([docPromise, stopCamPromise]);
+
             if (doc.exists) {
                 const student = doc.data();
-                console.log("Student Authenticated:", student.name);
-
-                // Add a log entry for the login
-                await db.collection('activityLogs').add({
+                
+                // Fire off background logs WITHOUT awaiting them sequentially
+                const logPromise = db.collection('activityLogs').add({
                     studentName: student.name,
                     action: "Authorized - QR Login",
                     timestamp: firebase.firestore.Timestamp.now(),
                     role: "student"
                 });
 
-                // --- RECORD ATTENDANCE ---
                 const now = new Date();
                 const hours = now.getHours();
                 const minutes = now.getMinutes().toString().padStart(2, '0');
                 const ampm = hours >= 12 ? 'PM' : 'AM';
                 const displayHour = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
 
-                await db.collection('attendance').add({
+                const attendancePromise = db.collection('attendance').add({
                     id: student.id,
                     name: student.name,
                     initials: student.name.split(' ').map(n => n[0]).join(''),
@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     timestamp: firebase.firestore.Timestamp.now()
                 });
 
+                // Jump to dashboard once the data is prepped (logs finish in background)
                 handleSuccessfulAuth('student', student);
             } else {
                 console.warn("Student ID not found in database:", studentId);
@@ -174,15 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 15, // Balanced FPS for high-resolution processing
+            fps: 30, // Maximize scan rate for instant recognition
             /* Removed qrbox and aspectRatio to provide the decoder with full, raw sensor data */
             videoConstraints: {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 1920 }, // 1080p Detail: Crucial for resolving "squashed" modules at angles
-                height: { ideal: 1080 }
+                width: { ideal: 1280 }, // 720p: Optimized for fast processing at high angles
+                height: { ideal: 720 }
             },
             experimentalFeatures: {
-                useBarCodeDetectorIfSupported: false // Disabled to favor the more robust software engine for perspective tilts
+                useBarCodeDetectorIfSupported: false // Software engine handles angles/skew much better
             }
         };
 
