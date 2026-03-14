@@ -46,27 +46,16 @@
                         <i class="fa-solid fa-qrcode pulse"></i> Scan QR Code / Upload Image
                     </button>
 
-                    <div class="divider">
+                    <div class="divider" style="display: none;">
                         <span>OR</span>
                     </div>
 
-                    <div class="input-group">
-                        <label for="student-id">Student ID</label>
-                        <div class="input-wrapper text-glow-focus">
-                            <i class="fa-solid fa-id-card"></i>
-                            <input type="text" id="student-id" placeholder="e.g. SC-1024">
-                        </div>
+                    <div class="manual-login-disabled" style="text-align: center; margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                        <p><i class="fa-solid fa-lock"></i> Manual login is currently disabled.</p>
+                        <p>Please use your Campus QR ID to authenticate.</p>
                     </div>
 
-                    <div class="input-group">
-                        <label for="student-password">Password / PIN</label>
-                        <div class="input-wrapper text-glow-focus">
-                            <i class="fa-solid fa-lock"></i>
-                            <input type="password" id="student-password" placeholder="••••••••">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary">Sign In as Student</button>
+                    <button type="submit" class="btn-primary" style="display: none;">Sign In as Student</button>
                 </form>
 
                 <!-- Admin Login Form -->

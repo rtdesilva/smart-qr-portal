@@ -287,63 +287,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- Traditional Form Handling ---
-
+    // --- Traditional Form Handling (Student Disabled) ---
+    /*
     formStudent.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = formStudent.querySelector('.btn-primary');
-        const idInput = document.getElementById('student-id').value;
-        const originalText = btn.innerHTML;
-
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating';
-        btn.disabled = true;
-
-        try {
-            const doc = await db.collection('students').doc(idInput).get();
-            if (doc.exists) {
-                const student = doc.data();
-
-                await db.collection('activityLogs').add({
-                    studentName: student.name,
-                    action: "Authorized - ID Login",
-                    timestamp: firebase.firestore.Timestamp.now(),
-                    role: "student"
-                });
-
-                // --- RECORD ATTENDANCE ---
-                const now = new Date();
-                const hours = now.getHours();
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                const displayHour = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-
-                await db.collection('attendance').add({
-                    id: student.id,
-                    name: student.name,
-                    initials: student.name.split(' ').map(n => n[0]).join(''),
-                    email: `${student.name.toLowerCase().replace(' ', '.')}@campus.edu`,
-                    course: student.course,
-                    date: now.toISOString().split('T')[0],
-                    time: `${displayHour}:${minutes} ${ampm}`,
-                    location: "Main Entrance",
-                    status: hours > 9 ? "late" : "present",
-                    method: "ID Input",
-                    timestamp: firebase.firestore.Timestamp.now()
-                });
-
-                handleSuccessfulAuth('student', student);
-            } else {
-                alert('Student ID not found in database.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('Cloud connection error. If using local file, ensure Firebase is configured.');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
+        // Feature removed as per user request
     });
+    */
 
     // --- Admin Authentication & Seeding ---
     const checkAndSeedAdmins = async () => {
