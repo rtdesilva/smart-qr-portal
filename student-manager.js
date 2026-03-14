@@ -110,12 +110,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (db) checkAndSeedData();
 
+    // Populate Course Dropdown
+    const populateCourseDropdown = async () => {
+        const courseSelect = document.getElementById('new-course');
+        if (!courseSelect) return;
+
+        try {
+            const snapshot = await db.collection('students').get();
+            const courses = new Set();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.course) courses.add(data.course);
+            });
+
+            // Keep "Computer Science", "Business Admin", "Engineering" as fallback/base options if not in DB
+            courses.add("Computer Science");
+            courses.add("Business Admin");
+            courses.add("Engineering");
+            courses.add("System Engineering");
+            courses.add("Information Technology");
+
+            courseSelect.innerHTML = '<option value="" disabled selected>Select Course / Major</option>';
+            Array.from(courses).sort().forEach(course => {
+                const option = document.createElement('option');
+                option.value = course;
+                option.textContent = course;
+                courseSelect.appendChild(option);
+            });
+            
+            // Add custom option
+            const customOption = document.createElement('option');
+            customOption.value = "CUSTOM";
+            customOption.textContent = "+ Add New Course...";
+            courseSelect.appendChild(customOption);
+
+        } catch (error) {
+            console.error('Error populating courses:', error);
+            courseSelect.innerHTML = '<option value="" disabled selected>Error loading courses</option>';
+        }
+    };
+
     // Toggle Modal
-    addStudentBtn.addEventListener('click', () => {
+    addStudentBtn.addEventListener('click', async () => {
         modal.style.display = 'flex';
         qrDisplay.style.display = 'none'; // reset
         form.style.display = 'block';
         if (form.reset) form.reset();
+        await populateCourseDropdown();
+    });
+
+    // Handle Custom Course selection
+    document.getElementById('new-course').addEventListener('change', (e) => {
+        if (e.target.value === 'CUSTOM') {
+            const customCourse = prompt('Enter the new Course / Major name:');
+            if (customCourse && customCourse.trim()) {
+                const option = document.createElement('option');
+                option.value = customCourse.trim();
+                option.textContent = customCourse.trim();
+                // Insert before the LAST option (+ Add New Course)
+                e.target.insertBefore(option, e.target.lastChild);
+                e.target.value = customCourse.trim();
+            } else {
+                e.target.value = '';
+            }
+        }
     });
 
     closeBtn.addEventListener('click', () => {

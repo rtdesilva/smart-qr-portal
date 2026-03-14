@@ -339,8 +339,10 @@
 
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label class="text-muted">Course / Major</label>
-                    <input type="text" id="new-course" required placeholder="e.g. Software Engineering"
-                        style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background:rgba(255,255,255,0.05); color: #fff;">
+                    <select id="new-course" required
+                        style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background:rgba(0,0,0,0.3); color: #fff;">
+                        <option value="" disabled selected>Loading courses...</option>
+                    </select>
                 </div>
 
                 <button type="submit" class="btn-primary"
