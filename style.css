@@ -671,10 +671,9 @@ body.light-mode {
 
 #qr-reader video {
     border-radius: 12px;
-    object-fit: contain !important;
-    /* Sharpen the feed and reduce haze for better QR detection */
-    filter: brightness(0.95) contrast(1.15) saturate(1.1);
-    image-rendering: -webkit-optimize-contrast;
+    object-fit: cover !important;
+    /* Removed heavy filters to prioritize raw camera speed over post-processing */
+    image-rendering: auto;
 }
 
 /* Custom Scanning Line */
