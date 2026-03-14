@@ -13,6 +13,18 @@
     --warning: #ffb300;
 }
 
+body.light-mode {
+    --bg-dark: #f8f9fa;
+    --panel-bg: rgba(255, 255, 255, 0.85);
+    --panel-border: rgba(0, 0, 0, 0.1);
+    --primary: #4e54c8;
+    --primary-light: #6c757d;
+    --accent: #4facfe;
+    --accent-dark: #00f2fe;
+    --text-main: #212529;
+    --text-muted: #6c757d;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -28,6 +40,13 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.light-mode {
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(78, 84, 200, 0.05), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(0, 242, 254, 0.05), transparent 25%);
 }
 
 /* Glassmorphism Utilities */
