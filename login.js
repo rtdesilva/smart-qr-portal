@@ -73,10 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleSuccessfulScan = async (qrData) => {
         if (isScanning) {
+            // Visual success feedback
+            const readerDiv = document.getElementById('qr-reader');
+            const flash = document.createElement('div');
+            flash.className = 'scan-flash';
+            readerDiv.appendChild(flash);
+            setTimeout(() => flash.remove(), 600);
+
             await stopScan();
             
             // --- ROBUST PARSING ---
-            // 1. Decode in case it's URL encoded (e.g. Student%3ASC-1234)
             let decodedData = qrData;
             try {
                 decodedData = decodeURIComponent(qrData);
@@ -157,11 +163,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 20, // Increased for faster capture
-            qrbox: { width: 300, height: 300 }, // Slightly larger box
+            fps: 20,
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                const qrboxSize = Math.floor(minEdgeSize * 0.75); // Use 75% of view for scanning
+                return {
+                    width: qrboxSize,
+                    height: qrboxSize
+                };
+            },
             aspectRatio: 1.0,
+            videoConstraints: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: { ideal: "environment" }
+            },
             experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true // Hardware acceleration
+                useBarCodeDetectorIfSupported: true 
             }
         };
 
