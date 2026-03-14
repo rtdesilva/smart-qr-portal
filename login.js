@@ -74,10 +74,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleSuccessfulScan = async (qrData) => {
         if (isScanning) {
             await stopScan();
-            // Determine ID. e.g. "Student:SC-2489"
-            let studentId = qrData;
-            if (qrData.includes('Student:')) {
-                studentId = qrData.split('Student:')[1].trim();
+            
+            // --- ROBUST PARSING ---
+            // 1. Decode in case it's URL encoded (e.g. Student%3ASC-1234)
+            let decodedData = qrData;
+            try {
+                decodedData = decodeURIComponent(qrData);
+            } catch (e) {
+                console.warn("Decoding failed, using raw data");
+            }
+
+            let studentId = decodedData.trim();
+
+            // 2. Handle "Student:ID" prefix (case-insensitive)
+            if (studentId.toLowerCase().startsWith('student:')) {
+                studentId = studentId.substring(8).trim();
+            }
+
+            // 3. Remove leading '#' if present (common in manually typed IDs)
+            if (studentId.startsWith('#')) {
+                studentId = studentId.substring(1).trim();
             }
 
             try {
