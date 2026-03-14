@@ -12,23 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     Chart.defaults.plugins.tooltip.borderColor = 'rgba(0, 242, 254, 0.2)';
     Chart.defaults.plugins.tooltip.borderWidth = 1;
 
-    // --- UI Helpers ---
-    const updateSystemHealth = () => {
-        const uptimeEl = document.getElementById('uptime-stat');
-        const healthEl = document.getElementById('system-health-stat');
-        const serverEl = document.getElementById('server-status-stat');
-
-        if (uptimeEl) {
-            // Simulate 99.9% uptime with some minor fluctuations
-            const uptime = (99.8 + Math.random() * 0.2).toFixed(2);
-            uptimeEl.innerText = `${uptime}%`;
-        }
-        if (healthEl) healthEl.innerText = "Optimal";
-        if (serverEl) serverEl.innerText = "Cloud Active";
-    };
-
-    updateSystemHealth();
-    setInterval(updateSystemHealth, 30000); // Update every 30s
 
     // Helper: Date Logic
     const getDateString = (date) => {
@@ -211,7 +194,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initializing remaining static charts (Confidence & Processing)
         initStaticCharts();
-        updateSystemMetrics();
 
     } catch (error) {
         console.error('Error initializing analytics charts:', error);
@@ -250,18 +232,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    async function updateSystemMetrics() {
-        const studentSnapshot = await db.collection('students').get();
-        const metricSummary = document.querySelector('.page-header p');
-        if (metricSummary) {
-            metricSummary.innerText = `Analyzing real-time metrics for ${studentSnapshot.size} students.`;
-        }
-
-        const storageStat = document.getElementById('model-storage-stat');
-        if (storageStat) {
-            const used = (studentSnapshot.size * 0.15).toFixed(1); // Mock calculation based on size
-            storageStat.innerText = `${used} GB / 100 GB Used`;
-        }
-    }
 });
 
