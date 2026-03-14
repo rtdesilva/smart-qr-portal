@@ -175,15 +175,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const config = {
-            fps: 30, // Maximize scan rate for instant recognition
-            /* Removed qrbox and aspectRatio to provide the decoder with full, raw sensor data */
+            fps: 20, // Balanced FPS to avoid CPU throttling
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                return {
+                    width: Math.floor(minEdgeSize * 0.75), // Focused region for faster analysis
+                    height: Math.floor(minEdgeSize * 0.75)
+                };
+            },
             videoConstraints: {
                 facingMode: { ideal: "environment" },
-                width: { ideal: 1280 }, // 720p: Optimized for fast processing at high angles
+                width: { ideal: 1280 }, // 720p is the sweet spot for detail vs performance
                 height: { ideal: 720 }
             },
             experimentalFeatures: {
-                useBarCodeDetectorIfSupported: false // Software engine handles angles/skew much better
+                useBarCodeDetectorIfSupported: true // Re-enable high-performance native scanning
             }
         };
 
