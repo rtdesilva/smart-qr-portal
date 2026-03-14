@@ -671,7 +671,7 @@ body.light-mode {
 
 #qr-reader video {
     border-radius: 12px;
-    object-fit: cover !important;
+    object-fit: contain !important;
 }
 
 /* Custom Scanning Line */
@@ -718,6 +718,19 @@ body.light-mode {
     background: white;
     z-index: 100;
     animation: flashEffect 0.5s ease-out forwards;
+}
+
+/* Support for camera feeds and placeholders */
+.cam-image, .feed-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+    padding: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.cam-image:hover, .feed-image:hover {
+    transform: scale(1.02);
 }
 
 @keyframes flashEffect {
